@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generational Wealth Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--bg:#080b14;--border:rgba(255,255,255,0.08);--border-b:rgba(255,255,255,0.15);--text:#f0f2f8;--muted:#6b7a9e;--accent:#4f8fff;--accent2:#7c3aed;--green:#10d9a0;--red:#ff5263;--gold:#f5c842;--glass:rgba(255,255,255,0.03);--gb:rgba(255,255,255,0.06);}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;font-size:16px;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 20% 10%,rgba(79,143,255,.12) 0%,transparent 60%),radial-gradient(ellipse 60% 40% at 80% 80%,rgba(124,58,237,.10) 0%,transparent 55%),radial-gradient(ellipse 50% 60% at 50% 50%,rgba(16,217,160,.04) 0%,transparent 70%);pointer-events:none;z-index:0;}
+body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(255,255,255,.015) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.015) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0;}
+header{position:relative;z-index:10;padding:16px 24px;display:flex;align-items:center;gap:16px;border-bottom:1px solid var(--border);backdrop-filter:blur(20px);background:rgba(8,11,20,.7);}
+.logo{width:36px;height:36px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 0 20px rgba(79,143,255,.4);flex-shrink:0;}
+header h1{font-family:'Syne',sans-serif;font-size:clamp(14px,2.5vw,18px);font-weight:700;letter-spacing:-.3px;}
+.tagline{font-size:clamp(11px,1.5vw,12px);color:var(--muted);}
+.livebadge{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:12px;color:var(--green);font-weight:500;white-space:nowrap;}
+.livedot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(1.3);}}
+nav{position:relative;z-index:10;display:flex;padding:0 20px;border-bottom:1px solid var(--border);background:rgba(8,11,20,.5);backdrop-filter:blur(20px);overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.tab{padding:13px 15px;font-size:clamp(11px,1.5vw,12px);font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s;display:flex;align-items:center;gap:6px;user-select:none;}
+.tab:hover{color:var(--text);}.tab.active{color:var(--text);border-bottom-color:var(--accent);}
+main{position:relative;z-index:10;padding:22px;max-width:1400px;margin:0 auto;}
+.panel{display:none;animation:fadeUp .3s ease;}.panel.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.ey{font-size:clamp(10px,1.3vw,11px);font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:5px;}
+.hd{font-family:'Syne',sans-serif;font-size:clamp(20px,3vw,26px);font-weight:800;margin-bottom:5px;letter-spacing:-.5px;}
+.ds{font-size:clamp(12px,1.5vw,13px);color:var(--muted);margin-bottom:22px;max-width:600px;line-height:1.65;}
+.card{background:var(--glass);border:1px solid var(--gb);border-radius:16px;padding:20px 22px;backdrop-filter:blur(20px);position:relative;overflow:hidden;transition:border-color .2s;}
+.card:hover{border-color:var(--border-b);}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);}
+.clbl{font-size:clamp(10px,1.3vw,11px);font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;}
+.sc{background:var(--glass);border:1px solid var(--gb);border-radius:16px;padding:18px 20px;position:relative;overflow:hidden;}
+.sc::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;border-radius:0 0 16px 16px;}
+.sa-b::after{background:linear-gradient(90deg,var(--accent),transparent);}
+.sa-g::after{background:linear-gradient(90deg,var(--green),transparent);}
+.sa-r::after{background:linear-gradient(90deg,var(--red),transparent);}
+.sa-gold::after{background:linear-gradient(90deg,var(--gold),transparent);}
+.sa-p::after{background:linear-gradient(90deg,var(--accent2),transparent);}
+.sv{font-family:'Syne',sans-serif;font-size:clamp(22px,3vw,30px);font-weight:800;letter-spacing:-1px;line-height:1;margin-bottom:5px;}
+.sl{font-size:clamp(11px,1.4vw,12px);color:var(--muted);}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.g5{display:grid;grid-template-columns:repeat(5,1fr);gap:13px;}
+.mt{margin-top:16px;}.mt2{margin-top:22px;}
+.controls{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:22px;background:var(--glass);border:1px solid var(--gb);border-radius:16px;padding:18px 20px;}
+.cg{display:flex;flex-direction:column;gap:5px;min-width:0;}
+.cg label{font-size:clamp(10px,1.3vw,11px);font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);white-space:nowrap;}
+.cg select,.cg input{font-family:'Inter',sans-serif;font-size:clamp(12px,1.5vw,13px);font-weight:500;padding:9px 11px;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:10px;color:var(--text);min-width:110px;width:100%;transition:border-color .2s;cursor:pointer;}
+.cg select:focus,.cg input:focus{outline:none;border-color:var(--accent);background:rgba(79,143,255,.08);}
+.cg select option{background:#111827;}
+.btn{font-family:'Inter',sans-serif;font-size:clamp(11px,1.4vw,12px);font-weight:600;letter-spacing:.5px;padding:10px 20px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:10px;cursor:pointer;transition:opacity .2s,transform .15s;box-shadow:0 4px 16px rgba(79,143,255,.3);white-space:nowrap;align-self:flex-end;}
+.btn:hover{opacity:.9;transform:translateY(-1px);}
+input[type=range]{-webkit-appearance:none;width:100%;height:4px;background:rgba(255,255,255,.1);border-radius:2px;outline:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#fff;cursor:pointer;border:3px solid var(--accent);box-shadow:0 0 10px rgba(79,143,255,.5);}
+.cw{position:relative;height:270px;}.cwt{position:relative;height:340px;}
+.divider{height:1px;background:var(--border);margin:18px 0;}
+/* 3-col comparison rows */
+.cmp3r{display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:clamp(11px,1.5vw,12px);align-items:baseline;}
+.cmp3r:last-child{border-bottom:none;}
+.c3l{color:var(--muted);}.c3a,.c3b{font-weight:600;text-align:right;white-space:nowrap;}
+/* standard cmp row */
+.cr{display:flex;justify-content:space-between;align-items:baseline;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:clamp(11px,1.5vw,13px);gap:10px;}
+.cr:last-child{border-bottom:none;}.cr .rl{color:var(--muted);font-size:clamp(10px,1.3vw,12px);flex:1;}.cr .rv{font-weight:600;text-align:right;white-space:nowrap;}
+/* hero bar */
+.hero{background:linear-gradient(135deg,rgba(79,143,255,.15),rgba(124,58,237,.12));border:1px solid rgba(79,143,255,.2);border-radius:20px;padding:26px 28px;display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:16px;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;background:radial-gradient(circle,rgba(79,143,255,.15),transparent 70%);pointer-events:none;}
+.hlbl{font-size:clamp(9px,1.2vw,11px);font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);margin-bottom:7px;}
+.hval{font-family:'Syne',sans-serif;font-size:clamp(20px,3vw,28px);font-weight:800;letter-spacing:-1px;line-height:1;margin-bottom:3px;}
+.hsub{font-size:clamp(10px,1.3vw,12px);color:var(--muted);}
+/* milestones */
+.ms{display:flex;align-items:flex-start;gap:12px;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:clamp(12px,1.5vw,13px);line-height:1.5;}
+.ms:last-child{border-bottom:none;}
+.msbdg{font-size:clamp(10px,1.3vw,11px);font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap;flex-shrink:0;}
+.msb{background:rgba(79,143,255,.15);color:var(--accent);}
+.msg{background:rgba(16,217,160,.15);color:var(--green);}
+.msgold{background:rgba(245,200,66,.15);color:var(--gold);}
+.msp{background:rgba(124,58,237,.15);color:#a78bfa;}
+.msr{background:rgba(255,82,99,.15);color:var(--red);}
+/* pp */
+.ppbig{font-family:'Syne',sans-serif;font-size:clamp(34px,6vw,52px);font-weight:800;letter-spacing:-2px;line-height:1.1;}
+/* burden */
+.bi{margin-bottom:16px;}.bitp{display:flex;justify-content:space-between;margin-bottom:6px;}
+.bname{font-size:clamp(12px,1.5vw,13px);font-weight:500;}.bscr{font-size:clamp(12px,1.5vw,13px);font-weight:700;}
+.btrack{height:8px;background:rgba(255,255,255,.07);border-radius:4px;overflow:hidden;}
+.bfill{height:100%;border-radius:4px;transition:width .8s cubic-bezier(.25,1,.5,1);}
+/* fork */
+.fo{border-radius:16px;overflow:hidden;border:1px solid var(--gb);transition:border-color .2s,box-shadow .2s;}
+.fo.winner{border-color:var(--accent);box-shadow:0 0 24px rgba(79,143,255,.2);}
+.fh{padding:13px 17px;font-family:'Syne',sans-serif;font-size:clamp(12px,1.5vw,13px);font-weight:700;}
+.fa .fh{background:linear-gradient(135deg,rgba(79,143,255,.25),rgba(79,143,255,.08));}
+.fb .fh{background:linear-gradient(135deg,rgba(124,58,237,.25),rgba(124,58,237,.08));}
+.fbdy{padding:16px;background:var(--glass);}
+.fval{font-family:'Syne',sans-serif;font-size:clamp(20px,3vw,26px);font-weight:800;letter-spacing:-.5px;margin-top:8px;}
+.fsub{font-size:clamp(10px,1.3vw,12px);color:var(--muted);margin-top:3px;}
+.fdt{font-size:clamp(10px,1.3vw,12px);color:var(--muted);margin-top:8px;line-height:1.6;border-top:1px solid rgba(255,255,255,.06);padding-top:8px;}
+/* regional */
+.rnote{background:rgba(79,143,255,.08);border:1px solid rgba(79,143,255,.2);border-radius:12px;padding:13px 17px;font-size:clamp(11px,1.4vw,13px);color:var(--muted);margin-bottom:18px;line-height:1.6;}
+.rnote a{color:var(--accent);text-decoration:none;}.rnote strong{color:var(--text);}
+/* table */
+.tw{overflow-x:auto;border-radius:12px;border:1px solid var(--gb);}
+table{width:100%;border-collapse:collapse;}
+th{font-size:clamp(9px,1.2vw,11px);font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);text-align:left;padding:11px 14px;border-bottom:1px solid var(--border);background:rgba(255,255,255,.02);white-space:nowrap;}
+td{padding:10px 14px;font-size:clamp(11px,1.4vw,12px);border-bottom:1px solid rgba(255,255,255,.03);white-space:nowrap;}
+tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(255,255,255,.025);}
+.tdn{font-weight:600;}.up{color:var(--green);}.dn{color:var(--red);}
+/* raw charts */
+.rcg{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;}
+pre{background:rgba(255,255,255,.04);border:1px solid var(--gb);border-radius:10px;padding:14px;overflow-x:auto;font-size:clamp(10px,1.3vw,12px);color:var(--text);line-height:1.7;}
+code{background:rgba(255,255,255,.08);padding:2px 6px;border-radius:4px;color:var(--accent);font-size:.9em;}
+@media(max-width:768px){
+  header{padding:12px 16px;}main{padding:14px;}nav{padding:0 12px;}
+  .g2,.g3,.g4,.g5,.hero,.rcg{grid-template-columns:1fr;}
+  .hero{padding:18px 16px;}.controls{padding:14px;gap:10px;}
+  .cw{height:210px;}.cwt{height:260px;}
+}
+@media(max-width:480px){
+  .g3,.g4,.g5{grid-template-columns:1fr 1fr;}
+  header h1{font-size:13px;}.tab{padding:11px 11px;font-size:11px;}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">◈</div>
+  <div><h1>Generational Wealth Dashboard</h1><div class="tagline">Economic Reality Index · 1950–2024 · U.S. Data</div></div>
+  <div class="livebadge"><div class="livedot"></div>BLS Data</div>
+</header>
+<nav>
+  <div class="tab active" onclick="showTab('compare',this)">⚖ Era Compare</div>
+  <div class="tab" onclick="showTab('scenario',this)">🧮 Life Scenario</div>
+  <div class="tab" onclick="showTab('purchasing',this)">💵 Purchasing Power</div>
+  <div class="tab" onclick="showTab('burden',this)">📊 Burden Index</div>
+  <div class="tab" onclick="showTab('fork',this)">🔀 What If?</div>
+  <div class="tab" onclick="showTab('regional',this)">🗺 Regional CPI</div>
+  <div class="tab" onclick="showTab('rawdata',this)">📋 Raw Data</div>
+</nav>
+<main>
+
+<!-- M1 ERA COMPARE -->
+<div id="panel-compare" class="panel active">
+  <div class="ey">Module 01</div><div class="hd">Era Comparator</div>
+  <div class="ds">Side-by-side: what did it cost to live at a given age across two different decades? Red values = worse outcome.</div>
+  <div class="controls">
+    <div class="cg"><label>Age</label><input type="number" id="cmp-age" value="30" min="18" max="80"></div>
+    <div class="cg"><label>Era A</label><select id="cmp-year-a">
+      <option value="1960">1960</option><option value="1970">1970</option><option value="1975">1975</option>
+      <option value="1980" selected>1980</option><option value="1985">1985</option><option value="1990">1990</option>
+      <option value="1995">1995</option><option value="2000">2000</option><option value="2005">2005</option><option value="2010">2010</option>
+    </select></div>
+    <div class="cg"><label>Era B</label><select id="cmp-year-b">
+      <option value="2005">2005</option><option value="2010">2010</option><option value="2015">2015</option>
+      <option value="2020">2020</option><option value="2024" selected>2024</option>
+    </select></div>
+    <button class="btn" onclick="runComparison()">Compare →</button>
+  </div>
+  <div class="card">
+    <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,.1);">
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted)">Metric</div>
+      <div style="font-size:11px;font-weight:700;text-align:right;color:var(--accent)" id="ch-a">1980</div>
+      <div style="font-size:11px;font-weight:700;text-align:right;color:#a78bfa" id="ch-b">2024</div>
+    </div>
+    <div id="cmp-body"></div>
+  </div>
+  <div class="mt2 card"><div class="clbl">Years of Median Income Required — Era A vs B</div>
+    <div class="cw"><canvas id="ratio-chart"></canvas></div></div>
+</div>
+
+<!-- M2 LIFE SCENARIO -->
+<div id="panel-scenario" class="panel">
+  <div class="ey">Module 02</div><div class="hd">Life Scenario Builder</div>
+  <div class="ds">Full simulation from first job to retirement. Adjust every variable and see how each decision compounds.</div>
+  <div class="controls">
+    <div class="cg"><label>Birth Year</label><select id="sc-birth">
+      <option>1950</option><option>1955</option><option selected>1960</option><option>1965</option><option>1970</option>
+      <option>1975</option><option>1980</option><option>1985</option><option>1990</option><option>1995</option><option>2000</option>
+    </select></div>
+    <div class="cg"><label>Education</label><select id="sc-edu">
+      <option value="none">No College</option><option value="trade">Trade School</option>
+      <option value="college" selected>4-Year College</option><option value="grad">Graduate Degree</option>
+    </select></div>
+    <div class="cg"><label>Income Tier</label><select id="sc-income">
+      <option value="p25">25th Percentile</option><option value="median" selected>Median (50th)</option><option value="p75">75th Percentile</option>
+    </select></div>
+    <div class="cg"><label>Savings %</label><input type="number" id="sc-save" value="10" min="0" max="70"></div>
+    <div class="cg"><label>Investment Mix</label><select id="sc-invest">
+      <option value="cash">Cash Only (1.5%)</option><option value="conservative">Conservative (5%)</option>
+      <option value="balanced" selected>Balanced 60/40 (7.2%)</option><option value="aggressive">All Stocks (9.5%)</option>
+    </select></div>
+    <div class="cg"><label>Bought Home?</label><select id="sc-home">
+      <option value="no">No — Rented all life</option><option value="22">Yes — age 22</option>
+      <option value="25">Yes — age 25</option><option value="28" selected>Yes — age 28</option>
+      <option value="32">Yes — age 32</option><option value="38">Yes — age 38</option>
+      <option value="45">Yes — age 45</option><option value="55">Yes — age 55</option>
+    </select></div>
+    <div class="cg"><label>Retire At</label><select id="sc-retire">
+      <option value="55">Age 55</option><option value="60">Age 60</option>
+      <option value="65" selected>Age 65</option><option value="70">Age 70</option>
+    </select></div>
+    <button class="btn" onclick="runScenario()">Run Scenario →</button>
+  </div>
+  <div id="scenario-out" style="display:none">
+    <div class="hero" id="sc-hero"></div>
+    <div class="g2">
+      <div class="card"><div class="clbl">Net Worth Trajectory</div><div class="cw"><canvas id="sc-chart"></canvas></div></div>
+      <div class="card"><div class="clbl">Lifetime Breakdown</div><div id="sc-breakdown"></div></div>
+    </div>
+    <div class="mt card"><div class="clbl">Key Life Milestones</div><div id="sc-ms"></div></div>
+  </div>
+</div>
+
+<!-- M3 PURCHASING POWER -->
+<div id="panel-purchasing" class="panel">
+  <div class="ey">Module 03</div><div class="hd">Purchasing Power Time Machine</div>
+  <div class="ds">What was your money really worth — and what does the same dollar amount buy now vs then?</div>
+  <div class="card">
+    <div class="g2" style="gap:20px;align-items:center;margin-bottom:18px">
+      <div class="cg" style="flex:1"><label>Dollar Amount</label><input type="number" id="pp-amt" value="100000" step="5000" style="min-width:0"></div>
+      <div class="cg" style="flex:3"><label>From Year: <strong id="pp-yr-lbl" style="color:var(--text)">1980</strong></label>
+        <input type="range" id="pp-yr" min="1950" max="2024" value="1980" oninput="updatePP()"></div>
+    </div>
+    <div style="text-align:center;padding:28px 20px">
+      <div style="font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">In <span id="pp-from">1980</span></div>
+      <div class="ppbig" id="pp-orig">$100,000</div>
+      <div style="font-size:24px;color:var(--muted);margin:10px 0">⇕</div>
+      <div style="font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Equivalent purchasing power in 2024</div>
+      <div class="ppbig" id="pp-eqv" style="color:var(--green)">—</div>
+      <div style="font-size:clamp(11px,1.5vw,13px);color:var(--muted);margin-top:8px" id="pp-note"></div>
+    </div>
+    <div class="divider"></div>
+    <div class="clbl">What could $<span id="pp-bamt">100,000</span> buy in <span id="pp-byr">1980</span> — compared to 2024?</div>
+    <div class="g4 mt" id="pp-basket"></div>
+  </div>
+  <div class="mt2 card"><div class="clbl">CPI Inflation Index Since 1950</div><div class="cw"><canvas id="infl-chart"></canvas></div></div>
+</div>
+
+<!-- M4 BURDEN INDEX -->
+<div id="panel-burden" class="panel">
+  <div class="ey">Module 04</div><div class="hd">Generational Burden Index</div>
+  <div class="ds">How hard is it to hit major financial milestones at a given age in a given year? 0 = easy, 100 = very difficult. Includes comparison to 2024.</div>
+  <div class="controls">
+    <div class="cg"><label>Year</label><select id="burd-yr" onchange="runBurden()">
+      <option>1960</option><option>1970</option><option>1980</option><option>1990</option>
+      <option>2000</option><option>2010</option><option>2015</option><option selected>2024</option>
+    </select></div>
+    <div class="cg"><label>Age of Person</label><select id="burd-age" onchange="runBurden()">
+      <option value="22">22 — fresh grad</option><option value="25">25</option>
+      <option value="28" selected>28 — typical 1st home</option><option value="32">32</option>
+      <option value="35">35</option><option value="40">40</option><option value="45">45</option><option value="50">50</option>
+    </select></div>
+    <button class="btn" onclick="runBurden()">Calculate →</button>
+  </div>
+  <div class="g5" id="burd-stats"></div>
+  <div class="g2 mt2">
+    <div class="card">
+      <div class="clbl">Component Scores</div><div id="burd-meters"></div>
+      <div class="divider"></div>
+      <div class="clbl" style="margin-bottom:10px">vs 2024 (modern baseline)</div>
+      <div id="burd-vs2024"></div>
+    </div>
+    <div class="card"><div class="clbl">Burden Score Over Time (selected age)</div><div class="cw"><canvas id="burd-chart"></canvas></div></div>
+  </div>
+</div>
+
+<!-- M5 WHAT IF -->
+<div id="panel-fork" class="panel">
+  <div class="ey">Module 05</div><div class="hd">What If? — Fork in the Road</div>
+  <div class="ds">One decision at a point in time. All housing scenarios use actual median home prices, real appreciation, and properly subtract rent costs from the renter's investment capacity.</div>
+  <div class="controls">
+    <div class="cg"><label>Decision Year</label><select id="fk-yr">
+      <option>1970</option><option>1975</option><option>1980</option><option>1985</option>
+      <option>1990</option><option>1995</option><option selected>2000</option>
+      <option>2005</option><option>2010</option><option>2015</option>
+    </select></div>
+    <div class="cg"><label>Starting Cash ($)</label><input type="number" id="fk-amt" value="20000"></div>
+    <div class="cg"><label>Monthly Contribution</label><select id="fk-mo">
+      <option value="0">None (lump sum only)</option><option value="200">$200/mo</option>
+      <option value="400" selected>$400/mo (~median 10%)</option><option value="700">$700/mo</option>
+      <option value="1200">$1,200/mo (high earner)</option><option value="custom">Custom…</option>
+    </select></div>
+    <div class="cg" id="fk-custom-wrap" style="display:none"><label>Custom $/mo</label><input type="number" id="fk-mo-custom" value="500"></div>
+    <div class="cg"><label>Scenario</label><select id="fk-type">
+      <option value="invest">S&P 500 vs Cash Savings</option>
+      <option value="house">Buy Home vs Rent + Invest</option>
+      <option value="college">College vs Skip + Work</option>
+      <option value="retire55">Retire at 55 vs 65</option>
+      <option value="spbond">S&P 500 vs 60/40 Portfolio</option>
+      <option value="crypto">S&P 500 vs Bitcoin (2010+)</option>
+      <option value="side">Day Job vs Build Side Business</option>
+    </select></div>
+    <button class="btn" onclick="runFork()">Simulate →</button>
+  </div>
+  <div id="fk-out" style="display:none">
+    <div class="g2" id="fk-cards"></div>
+    <div class="mt2 card"><div class="clbl">Value Divergence Over Time</div><div class="cwt"><canvas id="fk-chart"></canvas></div></div>
+    <div class="mt card"><div class="clbl">Key Insight & Assumptions</div><div id="fk-insight" style="font-size:clamp(12px,1.5vw,14px);line-height:1.8;color:var(--muted)"></div></div>
+  </div>
+</div>
+
+<!-- M6 REGIONAL -->
+<div id="panel-regional" class="panel">
+  <div class="ey">Module 06 · BLS Regional</div><div class="hd">Regional Cost of Living</div>
+  <div class="ds">BLS metro-area CPI for 25 cities. Compare purchasing power, income-to-housing ratios, and what median income actually buys locally.</div>
+  <div class="rnote"><strong>Source:</strong> BLS CUURA series. State-level CPI not published — use MERIC or HUD FMR for state/county breakdowns. <a href="https://www.bls.gov/bls/api_features.htm" target="_blank">BLS API →</a></div>
+  <div class="controls">
+    <div class="cg"><label>Sort By</label><select id="reg-sort" onchange="buildRegional()">
+      <option value="mult">Cost Multiplier</option><option value="cpi">CPI Value</option>
+      <option value="city">City Name</option><option value="income">Median Income</option><option value="afford">Affordability</option>
+    </select></div>
+    <div class="cg"><label>Filter</label><select id="reg-filter" onchange="buildRegional()">
+      <option value="all">All Cities</option><option value="expensive">Expensive (&gt;1.05×)</option>
+      <option value="affordable">Affordable (&lt;0.95×)</option><option value="west">West Coast</option>
+      <option value="south">South</option><option value="northeast">Northeast</option><option value="midwest">Midwest</option>
+    </select></div>
+    <div class="cg"><label>Compare City A</label><select id="reg-ca"><option value="">— Select —</option></select></div>
+    <div class="cg"><label>vs City B</label><select id="reg-cb"><option value="">— Select —</option></select></div>
+    <button class="btn" onclick="compareCities()">Compare Cities →</button>
+  </div>
+  <div id="city-cmp-out" style="display:none" class="mt2 card">
+    <div class="clbl" id="city-cmp-lbl">City Comparison</div>
+    <div class="g2 mt" id="city-cmp-body"></div>
+  </div>
+  <div class="mt2 card"><div class="clbl">Metro CPI & Affordability Data</div>
+    <div class="tw mt"><table><thead><tr>
+      <th>Metro Area</th><th>Region</th><th>Series ID</th><th>2024 CPI</th>
+      <th>Multiplier</th><th>vs Avg</th><th>Est. Income</th><th>$100K Buys</th><th>Home/Income</th>
+    </tr></thead><tbody id="reg-tbody"></tbody></table></div>
+  </div>
+  <div class="mt2 card"><div class="clbl">Cost Multiplier vs U.S. Average</div><div class="cwt"><canvas id="reg-chart"></canvas></div></div>
+</div>
+
+<!-- M7 RAW DATA -->
+<div id="panel-rawdata" class="panel">
+  <div class="ey">Module 07</div><div class="hd">Historical Reference Data</div>
+  <div class="ds">All underlying data with filtering and visual charts. Sources: BLS, Census Bureau, NAR, NADA, College Board.</div>
+  <div class="controls" style="margin-bottom:16px">
+    <div class="cg"><label>From Year</label><select id="raw-from">
+      <option value="1950">1950</option><option value="1970">1970</option><option value="1980">1980</option>
+      <option value="1990">1990</option><option value="2000">2000</option><option value="2010">2010</option>
+    </select></div>
+    <div class="cg"><label>To Year</label><select id="raw-to">
+      <option value="2024" selected>2024</option><option value="2010">2010</option>
+      <option value="2000">2000</option><option value="1990">1990</option>
+    </select></div>
+    <div class="cg"><label>Highlight</label><select id="raw-hl">
+      <option value="none">None</option><option value="housing">Worst Housing Ratios</option>
+      <option value="inflation">High Inflation Periods</option><option value="market">Best Market Years</option>
+    </select></div>
+    <button class="btn" onclick="buildRawTable()">Apply →</button>
+  </div>
+  <div class="tw"><table><thead><tr>
+    <th>Year</th><th>HH Income</th><th>Home Price</th><th>Groceries/mo</th>
+    <th>New Car</th><th>College/yr</th><th>CPI</th><th>S&P 500</th>
+    <th>Home/Income</th><th>Mortgage</th><th>Real Wage</th>
+  </tr></thead><tbody id="raw-tbody"></tbody></table></div>
+  <div class="rcg">
+    <div class="card"><div class="clbl">Income vs Home Price</div><div class="cw"><canvas id="rwc1"></canvas></div></div>
+    <div class="card"><div class="clbl">Home/Income Affordability Ratio</div><div class="cw"><canvas id="rwc2"></canvas></div></div>
+    <div class="card"><div class="clbl">Tuition & Car Prices</div><div class="cw"><canvas id="rwc3"></canvas></div></div>
+    <div class="card"><div class="clbl">S&P 500 Annual Returns</div><div class="cw"><canvas id="rwc4"></canvas></div></div>
+  </div>
+</div>
+
+</main>
+<script>
+Chart.defaults.color='#6b7a9e';
+Chart.defaults.borderColor='rgba(255,255,255,0.05)';
+Chart.defaults.font.family='Inter';
+
+const DATA={
+  1950:{income:3300,  home:7400,   groceries:45,  car:1510, tuition:400,  cpi:24.1, sp500:31.7},
+  1955:{income:4400,  home:11700,  groceries:68,  car:1800, tuition:500,  cpi:26.8, sp500:31.6},
+  1960:{income:5600,  home:11900,  groceries:85,  car:2200, tuition:700,  cpi:29.6, sp500:0.5},
+  1965:{income:6900,  home:13600,  groceries:95,  car:2650, tuition:900,  cpi:31.5, sp500:12.5},
+  1970:{income:9867,  home:17000,  groceries:120, car:3450, tuition:1200, cpi:38.8, sp500:4.0},
+  1975:{income:13719, home:35300,  groceries:175, car:4950, tuition:1700, cpi:53.8, sp500:37.2},
+  1980:{income:17710, home:47200,  groceries:255, car:7574, tuition:2550, cpi:82.4, sp500:32.4},
+  1985:{income:23618, home:75500,  groceries:330, car:9005, tuition:3859, cpi:107.6,sp500:32.2},
+  1990:{income:29943, home:123000, groceries:405, car:14422,tuition:5243, cpi:130.7,sp500:-3.1},
+  1995:{income:34076, home:131000, groceries:450, car:19400,tuition:6823, cpi:152.4,sp500:37.6},
+  2000:{income:41990, home:165300, groceries:530, car:22850,tuition:8650, cpi:172.2,sp500:-9.1},
+  2005:{income:46326, home:232000, groceries:600, car:27650,tuition:11441,cpi:195.3,sp500:4.9},
+  2010:{income:49276, home:173100, groceries:680, car:29200,tuition:13600,cpi:218.1,sp500:15.1},
+  2015:{income:56516, home:289200, groceries:780, car:33560,tuition:17474,cpi:237.0,sp500:1.4},
+  2020:{income:67521, home:336900, groceries:960, car:38000,tuition:22180,cpi:258.8,sp500:18.4},
+  2024:{income:80610, home:422600, groceries:1260,car:48100,tuition:27940,cpi:314.2,sp500:26.3},
+};
+const YEARS=Object.keys(DATA).map(Number).sort((a,b)=>a-b);
+const MORT={1960:5.1,1970:7.54,1975:9.05,1980:13.74,1985:12.43,1990:10.13,1995:7.93,2000:8.05,2005:5.87,2010:4.69,2015:3.85,2020:3.11,2024:6.95};
+const BTC={2010:9900,2011:-37,2012:186,2013:5507,2014:-58,2015:35,2016:125,2017:1318,2018:-72,2019:87,2020:303,2021:60,2022:-64,2023:154,2024:121};
+const REG=[
+  {city:'New York–Newark',    state:'NY/NJ',   region:'northeast',series:'CUURA421SA0', cpi:334.2,mult:1.063,income:82000, medHome:680000},
+  {city:'Los Angeles',         state:'CA',      region:'west',     series:'CUURA421SA0L',cpi:352.8,mult:1.123,income:76000, medHome:850000},
+  {city:'Chicago',             state:'IL/IN/WI',region:'midwest',  series:'CUURA207SA0', cpi:317.4,mult:1.010,income:72000, medHome:360000},
+  {city:'Dallas–Fort Worth',   state:'TX',      region:'south',    series:'CUURA316SA0', cpi:264.2,mult:0.841,income:71000, medHome:370000},
+  {city:'Houston',             state:'TX',      region:'south',    series:'CUURA318SA0', cpi:271.3,mult:0.864,income:65000, medHome:310000},
+  {city:'Washington D.C.',     state:'DC/VA/MD',region:'northeast',series:'CUURA311SA0', cpi:339.1,mult:1.080,income:110000,medHome:600000},
+  {city:'Miami',               state:'FL',      region:'south',    series:'CUURA320SA0', cpi:346.2,mult:1.102,income:62000, medHome:620000},
+  {city:'Philadelphia',        state:'PA/NJ',   region:'northeast',series:'CUURA102SA0', cpi:318.9,mult:1.015,income:70000, medHome:380000},
+  {city:'Atlanta',             state:'GA',      region:'south',    series:'CUURA319SA0', cpi:292.1,mult:0.930,income:68000, medHome:420000},
+  {city:'Phoenix',             state:'AZ',      region:'west',     series:'CUURA429SA0', cpi:301.4,mult:0.960,income:66000, medHome:450000},
+  {city:'Seattle',             state:'WA',      region:'west',     series:'CUURA423SA0', cpi:358.1,mult:1.140,income:95000, medHome:780000},
+  {city:'Denver',              state:'CO',      region:'west',     series:'CUURA433SA0', cpi:308.0,mult:0.981,income:75000, medHome:560000},
+  {city:'Boston',              state:'MA/NH',   region:'northeast',series:'CUURA103SA0', cpi:357.6,mult:1.139,income:90000, medHome:720000},
+  {city:'Detroit',             state:'MI',      region:'midwest',  series:'CUURA208SA0', cpi:321.7,mult:1.024,income:58000, medHome:230000},
+  {city:'Minneapolis',         state:'MN/WI',   region:'midwest',  series:'CUURA211SA0', cpi:309.2,mult:0.985,income:78000, medHome:370000},
+  {city:'San Diego',           state:'CA',      region:'west',     series:'CUURA424SA0', cpi:373.3,mult:1.189,income:88000, medHome:900000},
+  {city:'Tampa',               state:'FL',      region:'south',    series:'CUURA321SA0', cpi:304.8,mult:0.971,income:60000, medHome:410000},
+  {city:'Baltimore',           state:'MD',      region:'northeast',series:'CUURA311SA0B',cpi:326.4,mult:1.039,income:72000, medHome:380000},
+  {city:'Portland',            state:'OR/WA',   region:'west',     series:'CUURA425SA0', cpi:331.2,mult:1.054,income:80000, medHome:530000},
+  {city:'St. Louis',           state:'MO/IL',   region:'midwest',  series:'CUURA209SA0', cpi:281.3,mult:0.896,income:60000, medHome:260000},
+  {city:'Honolulu',            state:'HI',      region:'west',     series:'CUURA426SA0', cpi:411.6,mult:1.310,income:85000, medHome:980000},
+  {city:'Anchorage',           state:'AK',      region:'west',     series:'CUURA427SA0', cpi:347.1,mult:1.105,income:82000, medHome:480000},
+  {city:'San Francisco',       state:'CA',      region:'west',     series:'CUURA422SA0', cpi:384.2,mult:1.223,income:130000,medHome:1250000},
+  {city:'Cincinnati',          state:'OH/KY/IN',region:'midwest',  series:'CUURA213SA0', cpi:307.4,mult:0.979,income:62000, medHome:290000},
+  {city:'Pittsburgh',          state:'PA',      region:'northeast',series:'CUURA104SA0', cpi:295.8,mult:0.942,income:60000, medHome:240000},
+];
+const EDU={none:0.72,trade:0.88,college:1.0,grad:1.35};
+const TIER={p25:0.60,median:1.0,p75:1.55};
+const IRET={cash:0.015,conservative:0.05,balanced:0.072,aggressive:0.095};
+
+let CH={};
+function killCh(id){if(CH[id]){CH[id].destroy();delete CH[id];}}
+
+function lerp(yr,field){
+  if(DATA[yr])return DATA[yr][field];
+  const lo=YEARS.filter(y=>y<=yr).pop()||YEARS[0];
+  const hi=YEARS.filter(y=>y>=yr)[0]||YEARS[YEARS.length-1];
+  if(lo===hi)return DATA[lo][field];
+  return DATA[lo][field]+(yr-lo)/(hi-lo)*(DATA[hi][field]-DATA[lo][field]);
+}
+function getMort(yr){
+  const ks=Object.keys(MORT).map(Number).sort((a,b)=>a-b);
+  const lo=ks.filter(y=>y<=yr).pop()||ks[0];
+  const hi=ks.filter(y=>y>=yr)[0]||ks[ks.length-1];
+  if(lo===hi)return MORT[lo];
+  return MORT[lo]+(yr-lo)/(hi-lo)*(MORT[hi]-MORT[lo]);
+}
+function fm(n){
+  if(isNaN(n)||!isFinite(n))return'$—';
+  if(n<0)return'-'+fm(-n);
+  if(n>=1e6)return'$'+(n/1e6).toFixed(2)+'M';
+  if(n>=1e3)return'$'+Math.round(n).toLocaleString();
+  return'$'+n.toFixed(0);
+}
+function pct(n,d=1){return(n>=0?'+':'')+n.toFixed(d)+'%';}
+
+function showTab(id,el){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  el.classList.add('active');
+  if(id==='rawdata')buildRawTable();
+  if(id==='burden')runBurden();
+  if(id==='purchasing')updatePP();
+  if(id==='compare')runComparison();
+  if(id==='regional')buildRegional();
+}
+
+// M1 COMPARISON
+function runComparison(){
+  const a=+document.getElementById('cmp-year-a').value;
+  const b=+document.getElementById('cmp-year-b').value;
+  const age=+document.getElementById('cmp-age').value;
+  document.getElementById('ch-a').textContent=a;
+  document.getElementById('ch-b').textContent=b;
+
+  const fd=y=>{
+    const inc=lerp(y,'income'),home=lerp(y,'home'),car=lerp(y,'car');
+    const groc=lerp(y,'groceries'),tuit=lerp(y,'tuition'),mort=getMort(y),cpi=lerp(y,'cpi');
+    return{inc,home,car,groc,tuit,mort,cpi,ratio:home/inc};
+  };
+  const dA=fd(a),dB=fd(b);
+
+  const rows=[
+    {l:'Median HH Income',       va:fm(dA.inc),    vb:fm(dB.inc),    na:dA.inc,       nb:dB.inc,       inv:false},
+    {l:'Median Home Price',       va:fm(dA.home),   vb:fm(dB.home),   na:dA.home,      nb:dB.home,      inv:false},
+    {l:'Home / Income Ratio',     va:dA.ratio.toFixed(2)+'×',vb:dB.ratio.toFixed(2)+'×',na:dA.ratio,nb:dB.ratio,inv:true},
+    {l:'20% Down Payment',        va:fm(dA.home*.2),vb:fm(dB.home*.2),na:dA.home*.2,   nb:dB.home*.2,   inv:true},
+    {l:'Months Income → Down Pmt',va:Math.round(dA.home*.2/dA.inc*12)+'mo',vb:Math.round(dB.home*.2/dB.inc*12)+'mo',na:dA.home*.2/dA.inc*12,nb:dB.home*.2/dB.inc*12,inv:true},
+    {l:'30yr Mortgage Rate',      va:dA.mort.toFixed(2)+'%',vb:dB.mort.toFixed(2)+'%',na:dA.mort,nb:dB.mort,inv:true},
+    {l:'Monthly Groceries',       va:fm(dA.groc),   vb:fm(dB.groc),   na:dA.groc,      nb:dB.groc,      inv:true},
+    {l:'Groceries % of Income',   va:((dA.groc*12/dA.inc)*100).toFixed(1)+'%',vb:((dB.groc*12/dB.inc)*100).toFixed(1)+'%',na:dA.groc*12/dA.inc,nb:dB.groc*12/dB.inc,inv:true},
+    {l:'Avg New Car',             va:fm(dA.car),    vb:fm(dB.car),    na:dA.car,       nb:dB.car,       inv:true},
+    {l:'Car % of Income',         va:((dA.car/dA.inc)*100).toFixed(1)+'%',vb:((dB.car/dB.inc)*100).toFixed(1)+'%',na:dA.car/dA.inc,nb:dB.car/dB.inc,inv:true},
+    {l:'Public Tuition / yr',     va:fm(dA.tuit),   vb:fm(dB.tuit),   na:dA.tuit,      nb:dB.tuit,      inv:true},
+    {l:'4yr Degree Total',        va:fm(dA.tuit*4), vb:fm(dB.tuit*4), na:dA.tuit*4,    nb:dB.tuit*4,    inv:true},
+    {l:'CPI Index',               va:dA.cpi.toFixed(1),vb:dB.cpi.toFixed(1),na:dA.cpi,nb:dB.cpi,       inv:true},
+  ];
+
+  document.getElementById('cmp-body').innerHTML=rows.map(r=>{
+    const bIsWorse=r.inv?(r.nb>r.na):(r.nb<r.na);
+    const aIsWorse=r.inv?(r.na>r.nb):(r.na<r.nb);
+    return`<div class="cmp3r">
+      <div class="c3l">${r.l}</div>
+      <div class="c3a" style="${aIsWorse?'color:var(--red)':''}">${r.va}</div>
+      <div class="c3b" style="${bIsWorse?'color:var(--red)':''}">${r.vb}</div>
+    </div>`;
+  }).join('');
+
+  const cats=['Home/Income','Car/Income','Tuition/Income','Groceries×12/Income'];
+  const R=y=>{const i=lerp(y,'income');return[lerp(y,'home')/i,lerp(y,'car')/i,lerp(y,'tuition')/i,(lerp(y,'groceries')*12)/i];};
+  killCh('ratio');
+  const ctx=document.getElementById('ratio-chart').getContext('2d');
+  CH['ratio']=new Chart(ctx,{type:'bar',data:{labels:cats,datasets:[
+    {label:a+'',data:R(a),backgroundColor:'rgba(79,143,255,.7)',borderRadius:6},
+    {label:b+'',data:R(b),backgroundColor:'rgba(124,58,237,.7)',borderRadius:6}
+  ]},options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{labels:{font:{size:12}}}},
+    scales:{y:{title:{display:true,text:'Years of Income',font:{size:11}},grid:{color:'rgba(255,255,255,.05)'}},x:{grid:{display:false}}}}});
+}
+
+// M2 LIFE SCENARIO
+function runScenario(){
+  const birth=+document.getElementById('sc-birth').value;
+  const edu=document.getElementById('sc-edu').value;
+  const tier=document.getElementById('sc-income').value;
+  const saveRt=+document.getElementById('sc-save').value/100;
+  const inv=document.getElementById('sc-invest').value;
+  const homeVal=document.getElementById('sc-home').value;
+  const retireAge=+document.getElementById('sc-retire').value;
+  const ret=IRET[inv];
+  const startWork=birth+(edu==='grad'?26:edu==='college'?22:edu==='trade'?20:18);
+  const homeBuyAge=homeVal==='no'?null:+homeVal;
+  const homeBuyYr=homeBuyAge?birth+homeBuyAge:null;
+
+  let debt=0;
+  if(edu==='college')debt=lerp(Math.min(birth+18,2024),'tuition')*4*0.6;
+  if(edu==='grad')   debt=lerp(Math.min(birth+18,2024),'tuition')*6*0.7;
+  if(edu==='trade')  debt=lerp(Math.min(birth+18,2024),'tuition')*0.5;
+
+  let portfolio=-debt,homeEquity=0,lifetimeEarned=0,homePurchPrice=0;
+  const traj=[];
+
+  for(let age=startWork;age<=retireAge;age++){
+    const yr=Math.min(birth+age,2024);
+    const inc=lerp(yr,'income')*EDU[edu]*TIER[tier];
+    lifetimeEarned+=inc;
+    if(homeBuyYr&&(birth+age)===homeBuyYr){
+      homePurchPrice=lerp(Math.min(homeBuyYr,2024),'home');
+      portfolio-=homePurchPrice*0.20;
+      homeEquity=homePurchPrice*0.20;
+    }
+    if(homeBuyYr&&(birth+age)>homeBuyYr){
+      const hNow=lerp(Math.min(birth+age,2024),'home');
+      const yrsIn=birth+age-homeBuyYr;
+      const mortRem=homePurchPrice*0.80*Math.max(0,1-yrsIn/30);
+      homeEquity=Math.max(0,hNow-mortRem);
+    }
+    portfolio=portfolio*(1+ret)+inc*saveRt;
+    traj.push({age,portfolio,homeEquity:Math.max(0,homeEquity),netWorth:portfolio+Math.max(0,homeEquity)});
+  }
+
+  const fin=traj[traj.length-1];
+  const retIncome=Math.max(0,fin.netWorth)*0.04;
+
+  document.getElementById('sc-hero').innerHTML=`
+    <div><div class="hlbl">Retirement Net Worth</div><div class="hval">${fm(fin.netWorth)}</div><div class="hsub">at age ${retireAge} (${birth+retireAge})</div></div>
+    <div><div class="hlbl">Annual Retirement Income</div><div class="hval">${fm(retIncome)}</div><div class="hsub">4% safe withdrawal</div></div>
+    <div><div class="hlbl">Lifetime Gross Earned</div><div class="hval">${fm(lifetimeEarned)}</div><div class="hsub">${retireAge-startWork+birth} working years</div></div>`;
+
+  killCh('sc');
+  const ctx=document.getElementById('sc-chart').getContext('2d');
+  CH['sc']=new Chart(ctx,{type:'line',data:{
+    labels:traj.map(t=>t.age),
+    datasets:[
+      {label:'Net Worth',data:traj.map(t=>t.netWorth),borderColor:'#4f8fff',backgroundColor:'rgba(79,143,255,.08)',fill:true,tension:.35,borderWidth:2,pointRadius:0},
+      {label:'Portfolio',data:traj.map(t=>t.portfolio),borderColor:'#7c3aed',borderDash:[5,5],fill:false,tension:.35,borderWidth:2,pointRadius:0},
+      {label:'Home Equity',data:traj.map(t=>t.homeEquity),borderColor:'#10d9a0',fill:false,tension:.35,borderWidth:2,pointRadius:0},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{font:{size:11}}}},
+      scales:{y:{ticks:{callback:v=>fm(v)},grid:{color:'rgba(255,255,255,.05)'}},
+              x:{title:{display:true,text:'Age',font:{size:11}},grid:{display:false}}}}});
+
+  document.getElementById('sc-breakdown').innerHTML=`
+    <div class="cr"><span class="rl">Investment Portfolio</span><span class="rv">${fm(fin.portfolio)}</span></div>
+    <div class="cr"><span class="rl">Home Equity</span><span class="rv">${fm(fin.homeEquity)}</span></div>
+    <div class="cr"><span class="rl">Total Net Worth</span><span class="rv" style="color:var(--accent);font-size:15px;font-weight:700">${fm(fin.netWorth)}</span></div>
+    <div class="divider"></div>
+    <div class="cr"><span class="rl">Starting Student Debt</span><span class="rv" style="color:var(--red)">-${fm(debt)}</span></div>
+    <div class="cr"><span class="rl">Savings Rate</span><span class="rv">${(saveRt*100).toFixed(0)}%</span></div>
+    <div class="cr"><span class="rl">Invest Return</span><span class="rv">${(ret*100).toFixed(1)}%/yr</span></div>
+    <div class="cr"><span class="rl">Edu. Wage Premium</span><span class="rv">+${Math.round((EDU[edu]-1)*100)}%</span></div>
+    <div class="cr"><span class="rl">Home Purchase Price</span><span class="rv">${homeBuyYr?fm(homePurchPrice):'N/A'}</span></div>`;
+
+  const ms=[];
+  traj.forEach((t,i)=>{
+    const p=traj[i-1];if(!p)return;
+    if(t.netWorth>0&&p.netWorth<=0) ms.push(`<div class="ms"><span class="msbdg msb">Age ${t.age}</span>Crossed into positive net worth</div>`);
+    if(t.netWorth>=100000&&p.netWorth<100000) ms.push(`<div class="ms"><span class="msbdg msb">Age ${t.age}</span>Hit <strong>$100K</strong></div>`);
+    if(t.netWorth>=500000&&p.netWorth<500000) ms.push(`<div class="ms"><span class="msbdg msg">Age ${t.age}</span>Crossed <strong>$500K</strong></div>`);
+    if(t.netWorth>=1000000&&p.netWorth<1000000) ms.push(`<div class="ms"><span class="msbdg msgold">Age ${t.age}</span>🎉 Millionaire!</div>`);
+    if(t.netWorth>=2000000&&p.netWorth<2000000) ms.push(`<div class="ms"><span class="msbdg msp">Age ${t.age}</span>🚀 $2 Million</div>`);
+    if(t.netWorth>=5000000&&p.netWorth<5000000) ms.push(`<div class="ms"><span class="msbdg msgold">Age ${t.age}</span>💎 $5 Million</div>`);
+  });
+  if(homeBuyYr) ms.push(`<div class="ms"><span class="msbdg msr">Age ${homeBuyAge}</span>Bought home for ${fm(homePurchPrice)} in ${homeBuyYr}</div>`);
+  if(!ms.length) ms.push(`<div style="color:var(--muted);font-size:13px;padding:12px 0">No major milestones reached with this configuration.</div>`);
+  document.getElementById('sc-ms').innerHTML=ms.join('');
+  document.getElementById('scenario-out').style.display='block';
+}
+
+// M3 PURCHASING POWER
+function updatePP(){
+  const yr=+document.getElementById('pp-yr').value;
+  const amt=+document.getElementById('pp-amt').value||100000;
+  document.getElementById('pp-yr-lbl').textContent=yr;
+  document.getElementById('pp-from').textContent=yr;
+  document.getElementById('pp-byr').textContent=yr;
+  document.getElementById('pp-bamt').textContent=amt.toLocaleString();
+  const c0=lerp(yr,'cpi'),c1=lerp(2024,'cpi');
+  const equiv=amt*(c1/c0);
+  document.getElementById('pp-orig').textContent='$'+amt.toLocaleString();
+  document.getElementById('pp-eqv').textContent=fm(equiv);
+  const d=(equiv-amt)/amt*100;
+  document.getElementById('pp-note').textContent=`${d>0?'Inflation eroded':'Deflation boosted'} ${Math.abs(d).toFixed(0)}% of purchasing power since ${yr}`;
+
+  const g0=lerp(yr,'groceries'),g1=lerp(2024,'groceries');
+  const c_0=lerp(yr,'car'),c_1=lerp(2024,'car');
+  const h0=lerp(yr,'home'),h1=lerp(2024,'home');
+  const t0=lerp(yr,'tuition'),t1=lerp(2024,'tuition');
+
+  const basket=[
+    {l:'Months of Groceries',  then:Math.floor(amt/g0), now:Math.floor(amt/g1), unit:'months',col:'var(--green)'},
+    {l:'New Cars',             then:+(amt/c_0).toFixed(1),now:+(amt/c_1).toFixed(1),unit:'cars',col:'var(--accent)'},
+    {l:'Down Pmts (20%)',      then:+(amt/(h0*.2)).toFixed(1),now:+(amt/(h1*.2)).toFixed(1),unit:'down pmts',col:'var(--red)'},
+    {l:'Years of College',     then:+(amt/t0).toFixed(1),now:+(amt/t1).toFixed(1),unit:'years',col:'var(--gold)'},
+  ];
+  document.getElementById('pp-basket').innerHTML=basket.map(b=>{
+    const worse=parseFloat(b.now)<parseFloat(b.then);
+    return`<div class="sc" style="border-top:2px solid ${b.col};text-align:center;padding:16px">
+      <div style="font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">${b.l}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        <div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:3px">In ${yr}</div>
+          <div style="font-family:'Syne',sans-serif;font-size:clamp(18px,2.5vw,22px);font-weight:800;color:${b.col}">${b.then}</div>
+          <div style="font-size:10px;color:var(--muted)">${b.unit}</div>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:3px">In 2024</div>
+          <div style="font-family:'Syne',sans-serif;font-size:clamp(18px,2.5vw,22px);font-weight:800;color:${worse?'var(--red)':'var(--green)'}">${b.now}</div>
+          <div style="font-size:10px;color:var(--muted)">${b.unit}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  killCh('infl');
+  const ctx=document.getElementById('infl-chart').getContext('2d');
+  const iData=YEARS.map(y=>+(lerp(y,'cpi')/24.1*100).toFixed(1));
+  CH['infl']=new Chart(ctx,{type:'line',data:{labels:YEARS,datasets:[
+    {label:'CPI Index (1950=100)',data:iData,borderColor:'#f5c842',backgroundColor:'rgba(245,200,66,.07)',fill:true,tension:.3,borderWidth:2,pointRadius:4,pointBackgroundColor:'#f5c842'}
+  ]},options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{labels:{font:{size:11}}}},
+    scales:{y:{title:{display:true,text:'Index',font:{size:11}},grid:{color:'rgba(255,255,255,.05)'}},x:{grid:{display:false}}}}});
+}
+
+// M4 BURDEN
+function calcBurden(year,age){
+  const inc=lerp(year,'income')*(0.6+age/100);
+  const home=lerp(year,'home'),tuit=lerp(year,'tuition');
+  const groc=lerp(year,'groceries'),car=lerp(year,'car'),mort=getMort(year);
+  const hR=home/inc,dR=tuit*4/inc,cR=(groc*12+car*.12)/inc,mR=mort;
+  const hS=Math.min(100,(hR/8)*100);
+  const dS=Math.min(100,(dR/2)*100);
+  const cS=Math.min(100,(cR/.5)*100);
+  const mS=Math.min(100,(mR/16)*100);
+  const overall=hS*.35+dS*.25+cS*.25+mS*.15;
+  return{overall,hS,dS,cS,mS,hR,dR,cR,mort,downMonths:(home*.2)/(inc/12)};
+}
+
+function runBurden(){
+  const year=+document.getElementById('burd-yr').value;
+  const age=+document.getElementById('burd-age').value;
+  const b=calcBurden(year,age);
+  const b24=calcBurden(2024,age);
+  const col=b.overall>65?'var(--red)':b.overall>45?'var(--gold)':'var(--green)';
+
+  document.getElementById('burd-stats').innerHTML=`
+    <div class="sc sa-r"><div class="sl">Overall Burden</div><div class="sv" style="color:${col}">${b.overall.toFixed(0)}</div><div class="sl">/100 difficulty</div></div>
+    <div class="sc sa-b"><div class="sl">Home/Income</div><div class="sv" style="color:var(--accent)">${b.hR.toFixed(1)}×</div><div class="sl">ratio</div></div>
+    <div class="sc sa-p"><div class="sl">Debt/Income</div><div class="sv" style="color:#a78bfa">${b.dR.toFixed(2)}×</div><div class="sl">4yr tuition</div></div>
+    <div class="sc sa-gold"><div class="sl">Basics % Income</div><div class="sv" style="color:var(--gold)">${(b.cR*100).toFixed(0)}%</div><div class="sl">groc+car</div></div>
+    <div class="sc sa-g"><div class="sl">Months → Down Pmt</div><div class="sv" style="color:var(--green)">${b.downMonths.toFixed(0)}</div><div class="sl">months income</div></div>`;
+
+  document.getElementById('burd-meters').innerHTML=[
+    {l:'Housing Burden',s:b.hS,c:'#ff5263'},
+    {l:'Student Debt',s:b.dS,c:'#a78bfa'},
+    {l:'Cost of Living',s:b.cS,c:'#f5c842'},
+    {l:'Mortgage Rate',s:b.mS,c:'#4f8fff'},
+    {l:'Overall Score',s:b.overall,c:col},
+  ].map(m=>`<div class="bi">
+    <div class="bitp"><span class="bname">${m.l}</span><span class="bscr" style="color:${m.c}">${m.s.toFixed(0)}/100</span></div>
+    <div class="btrack"><div class="bfill" style="width:${m.s}%;background:${m.c}"></div></div>
+  </div>`).join('');
+
+  const delta=b.overall-b24.overall;
+  document.getElementById('burd-vs2024').innerHTML=`
+    <div class="cr"><span class="rl">Overall vs 2024</span><span class="rv" style="color:${delta<0?'var(--green)':'var(--red)'}">${delta>=0?'+':''}${delta.toFixed(0)} pts</span></div>
+    <div class="cr"><span class="rl">Home/Income in ${year}</span><span class="rv">${b.hR.toFixed(1)}× vs ${b24.hR.toFixed(1)}× (2024)</span></div>
+    <div class="cr"><span class="rl">Months to Down Pmt</span><span class="rv">${b.downMonths.toFixed(0)} mo vs ${b24.downMonths.toFixed(0)} mo (2024)</span></div>
+    <div class="cr"><span class="rl">Mortgage Rate</span><span class="rv">${b.mort.toFixed(2)}% vs ${b24.mort.toFixed(2)}% (2024)</span></div>`;
+
+  killCh('burd');
+  const bData=YEARS.map(y=>calcBurden(y,age).overall);
+  const ctx=document.getElementById('burd-chart').getContext('2d');
+  CH['burd']=new Chart(ctx,{type:'bar',data:{labels:YEARS,datasets:[
+    {label:'Burden Score',data:bData,
+     backgroundColor:bData.map(v=>v>65?'rgba(255,82,99,.75)':v>45?'rgba(245,200,66,.75)':'rgba(16,217,160,.75)'),borderRadius:4}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+    scales:{y:{min:0,max:100,title:{display:true,text:'Difficulty (0–100)',font:{size:11}},grid:{color:'rgba(255,255,255,.05)'}},x:{grid:{display:false}}}}});
+}
+
+// M5 WHAT IF
+document.getElementById('fk-mo').addEventListener('change',function(){
+  document.getElementById('fk-custom-wrap').style.display=this.value==='custom'?'':'none';
+});
+function getMonthly(){
+  const v=document.getElementById('fk-mo').value;
+  return v==='custom'?(+document.getElementById('fk-mo-custom').value||0):+v;
+}
+
+function runFork(){
+  const year=+document.getElementById('fk-yr').value;
+  const start=+document.getElementById('fk-amt').value||20000;
+  const type=document.getElementById('fk-type').value;
+  const monthly=getMonthly();
+  const endYr=2024, yrs=endYr-year;
+  let pA=[],pB=[],labA='',labB='',insight='',detA='',detB='';
+
+  if(type==='invest'){
+    labA='S&P 500 (~10%/yr avg)'; labB='FDIC Cash (~1.5%/yr)';
+    let a=start,b=start;
+    for(let i=0;i<=yrs;i++){pA.push(a);pB.push(b);a=a*1.10+monthly*12;b=b*1.015+monthly*12;}
+    const tc=start+monthly*12*yrs;
+    detA=`Total contributed: ${fm(tc)}. Market growth: ${fm(Math.max(0,pA[yrs]-tc))}.`;
+    detB=`Same contributions in savings. Interest earned: ${fm(Math.max(0,pB[yrs]-tc))} vs ${fm(Math.max(0,pA[yrs]-tc))} from market.`;
+    insight=`S&P 500 path: <strong>${fm(pA[yrs])}</strong> vs Cash: <strong>${fm(pB[yrs])}</strong> — a ${fm(pA[yrs]-pB[yrs])} difference over ${yrs} years. Historical ~10%/yr is a long-run average; actual years vary widely. Cash additionally loses real value to inflation.`;
+
+  }else if(type==='house'){
+    labA='Buy a Home (median price, appreciate to 2024)'; labB='Rent + Invest Down Payment';
+    const hP=lerp(year,'home'),hPnow=lerp(2024,'home');
+    const appRate=Math.pow(hPnow/hP,1/yrs)-1;
+    const mortRate=getMort(year)/100;
+    const mortBal=hP*0.80;
+    const mmort=mortBal*(mortRate/12)*Math.pow(1+mortRate/12,360)/(Math.pow(1+mortRate/12,360)-1);
+    const baseRent=hP*0.007; // ~0.7% of home value/mo as starting rent
+    let hv=hP,mortRem=mortBal,rPortfolio=start; // renter invests the down payment
+    let totalRent=0,totalMort=0;
+    for(let i=0;i<=yrs;i++){
+      const rent=baseRent*Math.pow(1.03,i);
+      totalRent+=rent*12;
+      totalMort+=mmort*12;
+      mortRem=Math.max(0,mortRem*(1+mortRate/12*12)-mmort*12);
+      const buyerEquity=Math.max(0,hv-mortRem);
+      // Renter invests down payment + any savings from (mortgage+maint - rent) difference + monthly
+      const mDiff=Math.max(0,mmort+hP*.01/12-rent);
+      rPortfolio=rPortfolio*(1+.072)+mDiff*12+monthly*12;
+      pA.push(buyerEquity); pB.push(rPortfolio);
+      hv*=(1+appRate);
+    }
+    detA=`Bought at ${fm(hP)} in ${year} with ${fm(hP*.2)} down at ${getMort(year).toFixed(2)}% (30yr fixed). Home value grew to ~${fm(hPnow)} (${(appRate*100).toFixed(1)}%/yr). Total mortgage paid: ${fm(totalMort)}.`;
+    detB=`Renter invested ${fm(hP*.2)} down payment at 7.2%/yr plus monthly savings. Total rent paid over ${yrs} years: ~${fm(totalRent)}. Rent grows at 3%/yr.`;
+    insight=`<strong>Homebuyer equity in 2024: ${fm(pA[yrs])}</strong><br><strong>Renter-investor portfolio: ${fm(pB[yrs])}</strong><br><br>${detA}<br><br>${detB}<br><br>Results depend heavily on local market and mortgage rate era. The rent scenario invests any cost difference between mortgage+maintenance and rent.`;
+
+  }else if(type==='college'){
+    labA='4-Year College (higher lifetime income)'; labB='Skip College — work immediately';
+    const debt=lerp(year,'tuition')*4*0.6;
+    let a=-debt,b=0;
+    for(let i=0;i<=yrs;i++){
+      const yr2=Math.min(year+i,2024);
+      if(i>4){a=a*1.072+lerp(yr2,'income')*EDU['college']*.10+monthly*12;}
+      b=b*1.072+lerp(yr2,'income')*EDU['none']*.10+monthly*12;
+      pA.push(a);pB.push(b);
+    }
+    detA=`Starts with -${fm(debt)} debt, graduates in 4 years at ${(EDU.college*100).toFixed(0)}% median income. Saves 10%.`;
+    detB=`Starts working immediately at ${(EDU.none*100).toFixed(0)}% median income with no debt. Saves 10%.`;
+    insight=`College path: <strong>${fm(pA[yrs])}</strong> vs No-college: <strong>${fm(pB[yrs])}</strong>.<br><br>${detA}<br>${detB}<br><br>Break-even typically arrives 8–14 years post-graduation. Field of study matters enormously.`;
+
+  }else if(type==='retire55'){
+    // Retire at 55 vs 65: both have the same starting portfolio TODAY
+    // At 55 they stop contributing and start withdrawing
+    // At 65 they keep contributing for 10 more years then withdraw
+    labA='Retire at 55 — draw down over 30+ years'; labB='Work to 65 — 10 more years compounding';
+    const port55=start;
+    // port65 = start compounded 10yr + contributions each year
+    let port65=start;
+    for(let i=0;i<10;i++){port65=port65*1.072+monthly*12;}
+    const draw55=port55*.035; // 3.5% — longer horizon needs conservative rate
+    const draw65=port65*.040; // 4% — standard
+    let a=port55,b=start;
+    const steps=Math.min(yrs,35);
+    for(let i=0;i<=steps;i++){
+      if(i<=10){
+        pA.push(Math.max(0,a));
+        b=b*(1.072)+monthly*12;
+        pB.push(b);
+        a=Math.max(0,a*(1.072)-draw55);
+      }else{
+        pA.push(Math.max(0,a));
+        pB.push(Math.max(0,b));
+        a=Math.max(0,a*(1.072)-draw55);
+        b=Math.max(0,b*(1.072)-draw65);
+      }
+    }
+    const a55depleted=pA[steps]<=0;
+    detA=`Retires at 55 with ${fm(port55)}. Uses 3.5% withdrawal (${fm(draw55)}/yr) to account for 30+ year horizon. ${a55depleted?'⚠️ Portfolio DEPLETED before end of period!':'Portfolio appears sustainable.'}`;
+    detB=`Works 10 more years, contributing ${fm(monthly)}/mo. Portfolio grows to ${fm(Math.round(port65))}. Withdraws ${fm(Math.round(draw65))}/yr (4% rule). Final value: ${fm(pB[steps])}.`;
+    insight=`<strong>Retire at 55:</strong> ${detA}<br><br><strong>Work to 65:</strong> ${detB}<br><br>The 10 extra years of compounding and contributions roughly double the starting portfolio, and the later retiree can use a more generous 4% rate vs the early retiree's 3.5%. The cost of early retirement is paid in portfolio size — the benefit is a decade of leisure.`;
+
+  }else if(type==='spbond'){
+    labA='100% S&P 500 (~10%/yr)'; labB='60/40 Portfolio (~7.2%/yr)';
+    let a=start,b=start;
+    for(let i=0;i<=yrs;i++){pA.push(a);pB.push(b);a=a*1.10+monthly*12;b=b*1.072+monthly*12;}
+    const tc=start+monthly*12*yrs;
+    insight=`Stocks: <strong>${fm(pA[yrs])}</strong> vs Balanced: <strong>${fm(pB[yrs])}</strong> over ${yrs} years. The pure stock portfolio outperforms long-term but with significantly higher volatility — in any given year, the S&P can drop 30–50%. The 60/40 is designed for smoother growth, especially important near retirement when a bad year can permanently impair withdrawals (sequence-of-returns risk).`;
+
+  }else if(type==='crypto'){
+    const cs=Math.max(year,2010);
+    labA='S&P 500 (~10%/yr)'; labB='Bitcoin (historical, highly volatile)';
+    let a=start,b=start;
+    const csteps=endYr-cs;
+    for(let i=0;i<=csteps;i++){
+      const yr2=cs+i;
+      pA.push(a);pB.push(b);
+      a=a*1.10+monthly*12;
+      const br=(BTC[yr2]||0)/100;
+      b=Math.max(0,b*(1+br)+monthly*12);
+    }
+    insight=`S&P 500: <strong>${fm(pA[pA.length-1])}</strong>. Bitcoin: <strong>${fm(pB[pB.length-1])}</strong> since ${cs}. <strong>⚠️ Warning:</strong> Bitcoin's historical returns are extraordinary and unrepeatable. It has suffered 70%+ drawdowns multiple times. If you had sold at a bottom, returns would look completely different. This is illustrative only. Scenarios before 2010 unavailable (Bitcoin launched 2009).`;
+
+  }else if(type==='side'){
+    labA='Day Job Only (10% savings)'; labB='Day Job + Side Business (ramp to 30%)';
+    let a=start,b=start;
+    for(let i=0;i<=yrs;i++){
+      const yr2=Math.min(year+i,2024);
+      const inc=lerp(yr2,'income');
+      pA.push(a);pB.push(b);
+      a=a*1.072+inc*.10+monthly*12;
+      const bSave=i<5?.05:.30;
+      b=b*1.072+inc*bSave+monthly*12;
+    }
+    insight=`Day job only: <strong>${fm(pA[yrs])}</strong>. Side business path: <strong>${fm(pB[yrs])}</strong>. The model assumes a 5-year ramp period where the side business saves at a lower rate, then reaches 30% savings as income grows. The gap represents the long-term value of building an additional income stream. Actual results depend heavily on business success.`;
+  }
+
+  const fA=pA[pA.length-1],fB=pB[pB.length-1];
+  const winA=fA>=fB;
+  document.getElementById('fk-cards').innerHTML=`
+    <div class="fo fa ${winA?'winner':''}">
+      <div class="fh">${winA?'★ ':''}Path A</div>
+      <div class="fbdy">
+        <div style="font-size:13px;color:var(--muted)">${labA}</div>
+        <div class="fval" style="color:var(--accent)">${fm(fA)}</div>
+        <div class="fsub">final value in 2024</div>
+        ${detA?`<div class="fdt">${detA}</div>`:''}
+      </div>
+    </div>
+    <div class="fo fb ${!winA?'winner':''}">
+      <div class="fh">${!winA?'★ ':''}Path B</div>
+      <div class="fbdy">
+        <div style="font-size:13px;color:var(--muted)">${labB}</div>
+        <div class="fval" style="color:#a78bfa">${fm(fB)}</div>
+        <div class="fsub">final value in 2024</div>
+        ${detB?`<div class="fdt">${detB}</div>`:''}
+      </div>
+    </div>`;
+
+  killCh('fk');
+  const xLen=Math.min(pA.length,pB.length);
+  const lbls=Array.from({length:xLen},(_,i)=>year+i);
+  const ctx=document.getElementById('fk-chart').getContext('2d');
+  CH['fk']=new Chart(ctx,{type:'line',data:{labels:lbls,datasets:[
+    {label:labA,data:pA.slice(0,xLen),borderColor:'#4f8fff',backgroundColor:'rgba(79,143,255,.07)',fill:true,tension:.3,borderWidth:2,pointRadius:0},
+    {label:labB,data:pB.slice(0,xLen),borderColor:'#a78bfa',backgroundColor:'rgba(167,139,250,.07)',fill:true,tension:.3,borderWidth:2,pointRadius:0},
+  ]},options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{labels:{font:{size:11}}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+fm(c.raw)}}},
+    scales:{y:{ticks:{callback:v=>fm(v)},grid:{color:'rgba(255,255,255,.05)'}},x:{grid:{display:false}}}}});
+
+  document.getElementById('fk-insight').innerHTML=insight;
+  document.getElementById('fk-out').style.display='block';
+}
+
+// M6 REGIONAL
+function populateCityDropdowns(){
+  const opts=REG.map((r,i)=>`<option value="${i}">${r.city}</option>`).join('');
+  ['reg-ca','reg-cb'].forEach(id=>{
+    document.getElementById(id).innerHTML='<option value="">— Select —</option>'+opts;
+  });
+}
+
+function buildRegional(){
+  const sort=document.getElementById('reg-sort').value;
+  const filter=document.getElementById('reg-filter').value;
+  let data=[...REG];
+  if(filter==='expensive') data=data.filter(r=>r.mult>1.05);
+  else if(filter==='affordable') data=data.filter(r=>r.mult<0.95);
+  else if(filter!=='all') data=data.filter(r=>r.region===filter);
+  if(sort==='mult') data.sort((a,b)=>b.mult-a.mult);
+  else if(sort==='cpi') data.sort((a,b)=>b.cpi-a.cpi);
+  else if(sort==='city') data.sort((a,b)=>a.city.localeCompare(b.city));
+  else if(sort==='income') data.sort((a,b)=>b.income-a.income);
+  else if(sort==='afford') data.sort((a,b)=>(a.medHome/a.income)-(b.medHome/b.income));
+
+  document.getElementById('reg-tbody').innerHTML=data.map(r=>{
+    const delta=(r.mult-1)*100;
+    const equiv=Math.round(100000/r.mult);
+    const afford=(r.medHome/r.income).toFixed(1);
+    return`<tr>
+      <td><strong>${r.city}</strong></td>
+      <td style="color:var(--muted)">${r.region}</td>
+      <td style="color:var(--muted);font-size:10px">${r.series}</td>
+      <td class="tdn">${r.cpi.toFixed(1)}</td>
+      <td class="tdn ${r.mult>1.05?'dn':r.mult<0.95?'up':''}">${r.mult.toFixed(3)}×</td>
+      <td class="${delta>0?'dn':'up'} tdn">${delta>=0?'+':''}${delta.toFixed(1)}%</td>
+      <td class="tdn">${fm(r.income)}</td>
+      <td class="tdn">$${equiv.toLocaleString()}</td>
+      <td class="tdn ${+afford>6?'dn':+afford<4?'up':''}">${afford}×</td>
+    </tr>`;
+  }).join('');
+
+  killCh('reg');
+  const ctx=document.getElementById('reg-chart').getContext('2d');
+  CH['reg']=new Chart(ctx,{type:'bar',data:{
+    labels:data.map(r=>r.city.split('–')[0]),
+    datasets:[
+      {label:'Cost Multiplier',data:data.map(r=>r.mult),
+       backgroundColor:data.map(r=>r.mult>1.1?'rgba(255,82,99,.75)':r.mult<0.92?'rgba(16,217,160,.75)':'rgba(79,143,255,.65)'),
+       borderRadius:4,yAxisID:'y'},
+      {type:'line',label:'National Avg (1.0×)',data:data.map(()=>1.0),
+       borderColor:'rgba(245,200,66,.8)',borderDash:[6,3],borderWidth:2,pointRadius:0,fill:false,yAxisID:'y'},
+    ]
+  },options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{labels:{font:{size:11}}}},
+    scales:{y:{ticks:{font:{size:10}},grid:{display:false}},
+            x:{min:0.7,max:1.4,title:{display:true,text:'Cost Multiplier',font:{size:11}},grid:{color:'rgba(255,255,255,.05)'}}}}});
+}
+
+function compareCities(){
+  const iA=document.getElementById('reg-ca').value;
+  const iB=document.getElementById('reg-cb').value;
+  if(!iA||!iB){alert('Select two cities.');return;}
+  const cA=REG[+iA],cB=REG[+iB];
+  document.getElementById('city-cmp-lbl').textContent=`${cA.city} vs ${cB.city}`;
+  const fmrow=(k,va,vb,inv=false)=>{
+    const aNum=parseFloat(va),bNum=parseFloat(vb);
+    const bW=inv?(bNum>aNum):(bNum<aNum);
+    const aW=inv?(aNum>bNum):(aNum<bNum);
+    return`<div class="cr"><span class="rl">${k}</span>
+      <span class="rv" style="float:left;${aW?'color:var(--red)':''}">${va}</span>
+      <span class="rv" style="${bW?'color:var(--red)':''}">${vb}</span></div>`;
+  };
+  const body=`
+    <div class="card">
+      <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--accent);margin-bottom:4px">${cA.mult.toFixed(2)}×</div>
+      <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:700">${cA.city}</div>
+      <div style="color:var(--muted);font-size:12px;margin-bottom:14px">${cA.state}</div>
+      <div class="cr"><span class="rl">Cost Multiplier</span><span class="rv">${cA.mult.toFixed(3)}×</span></div>
+      <div class="cr"><span class="rl">2024 CPI</span><span class="rv">${cA.cpi.toFixed(1)}</span></div>
+      <div class="cr"><span class="rl">Est. Median Income</span><span class="rv">${fm(cA.income)}</span></div>
+      <div class="cr"><span class="rl">$100K Buys</span><span class="rv">$${Math.round(100000/cA.mult).toLocaleString()}</span></div>
+      <div class="cr"><span class="rl">Median Home</span><span class="rv">${fm(cA.medHome)}</span></div>
+      <div class="cr"><span class="rl">Home/Income Ratio</span><span class="rv">${(cA.medHome/cA.income).toFixed(1)}×</span></div>
+    </div>
+    <div class="card">
+      <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#a78bfa;margin-bottom:4px">${cB.mult.toFixed(2)}×</div>
+      <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:700">${cB.city}</div>
+      <div style="color:var(--muted);font-size:12px;margin-bottom:14px">${cB.state}</div>
+      <div class="cr"><span class="rl">Cost Multiplier</span><span class="rv">${cB.mult.toFixed(3)}×</span></div>
+      <div class="cr"><span class="rl">2024 CPI</span><span class="rv">${cB.cpi.toFixed(1)}</span></div>
+      <div class="cr"><span class="rl">Est. Median Income</span><span class="rv">${fm(cB.income)}</span></div>
+      <div class="cr"><span class="rl">$100K Buys</span><span class="rv">$${Math.round(100000/cB.mult).toLocaleString()}</span></div>
+      <div class="cr"><span class="rl">Median Home</span><span class="rv">${fm(cB.medHome)}</span></div>
+      <div class="cr"><span class="rl">Home/Income Ratio</span><span class="rv">${(cB.medHome/cB.income).toFixed(1)}×</span></div>
+    </div>`;
+  document.getElementById('city-cmp-body').innerHTML=body;
+  document.getElementById('city-cmp-out').style.display='block';
+}
+
+// M7 RAW DATA
+function buildRawTable(){
+  const from=+document.getElementById('raw-from').value;
+  const to=+document.getElementById('raw-to').value;
+  const hl=document.getElementById('raw-hl').value;
+  const filtered=YEARS.filter(y=>y>=from&&y<=to);
+
+  document.getElementById('raw-tbody').innerHTML=filtered.map(y=>{
+    const d=DATA[y],mort=getMort(y).toFixed(2),ratio=(d.home/d.income).toFixed(2);
+    const realWage=Math.round(d.income/d.cpi*24.1);
+    let rs='';
+    if(hl==='housing'&&d.home/d.income>5.5) rs='background:rgba(255,82,99,.08)';
+    if(hl==='inflation'){const prev=lerp(y-5,'cpi');if((d.cpi-prev)/prev>.25)rs='background:rgba(245,200,66,.08)';}
+    if(hl==='market'&&d.sp500>25) rs='background:rgba(16,217,160,.08)';
+    return`<tr style="${rs}">
+      <td><strong>${y}</strong></td><td class="tdn">${fm(d.income)}</td><td class="tdn">${fm(d.home)}</td>
+      <td class="tdn">${fm(d.groceries)}/mo</td><td class="tdn">${fm(d.car)}</td><td class="tdn">${fm(d.tuition)}</td>
+      <td class="tdn">${d.cpi.toFixed(1)}</td><td class="tdn ${d.sp500>=0?'up':'dn'}">${pct(d.sp500)}</td>
+      <td class="tdn ${ratio>5.5?'dn':ratio<3.5?'up':''}">${ratio}×</td>
+      <td class="tdn">${mort}%</td><td class="tdn">${fm(realWage)}</td>
+    </tr>`;
+  }).join('');
+
+  killCh('rw1');killCh('rw2');killCh('rw3');killCh('rw4');
+  const c1=document.getElementById('rwc1').getContext('2d');
+  CH['rw1']=new Chart(c1,{type:'line',data:{labels:filtered,datasets:[
+    {label:'Median Income',data:filtered.map(y=>DATA[y].income),borderColor:'#4f8fff',fill:false,tension:.3,borderWidth:2,pointRadius:3},
+    {label:'Home Price',data:filtered.map(y=>DATA[y].home),borderColor:'#ff5263',fill:false,tension:.3,borderWidth:2,pointRadius:3},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:11}}}},
+    scales:{y:{ticks:{callback:v=>fm(v)},grid:{color:'rgba(255,255,255,.05)'}},x:{grid:{display:false}}}}});
+
+  const c2=document.getElementById('rwc2').getContext('2d');
+  CH['rw2']=new Chart(c2,{type:'line',data:{labels:filtered,datasets:[
+    {label:'Home/Income',data:filtered.map(y=>+(DATA[y].home/DATA[y].income).toFixed(2)),
+     borderColor:'#f5c842',backgroundColor:'rgba(245,200,66,.08)',fill:true,tension:.3,borderWidth:2,pointRadius:3,pointBackgroundColor:'#f5c842'},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:11}}}},
+    scales:{y:{title:{display:true,text:'Ratio (×)',font:{size:10}},grid:{color:'rgba(255,255,255,.05)'}},x:{grid:{display:false}}}}});
+
+  const c3=document.getElementById('rwc3').getContext('2d');
+  CH['rw3']=new Chart(c3,{type:'line',data:{labels:filtered,datasets:[
+    {label:'Tuition/yr',data:filtered.map(y=>DATA[y].tuition),borderColor:'#a78bfa',fill:false,tension:.3,borderWidth:2,pointRadius:3},
+    {label:'Avg New Car',data:filtered.map(y=>DATA[y].car),borderColor:'#10d9a0',fill:false,tension:.3,borderWidth:2,pointRadius:3},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:11}}}},
+    scales:{y:{ticks:{callback:v=>fm(v)},grid:{color:'rgba(255,255,255,.05)'}},x:{grid:{display:false}}}}});
+
+  const c4=document.getElementById('rwc4').getContext('2d');
+  CH['rw4']=new Chart(c4,{type:'bar',data:{labels:filtered,datasets:[
+    {label:'S&P 500 Return',data:filtered.map(y=>DATA[y].sp500),
+     backgroundColor:filtered.map(y=>DATA[y].sp500>=0?'rgba(16,217,160,.75)':'rgba(255,82,99,.75)'),borderRadius:4},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:11}}}},
+    scales:{y:{title:{display:true,text:'Return %',font:{size:10}},ticks:{callback:v=>v+'%'},grid:{color:'rgba(255,255,255,.05)'}},x:{grid:{display:false}}}}});
+}
+
+// INIT
+window.addEventListener('load',()=>{
+  runComparison();
+  updatePP();
+  populateCityDropdowns();
+  document.getElementById('pp-amt').addEventListener('input',updatePP);
+  document.getElementById('pp-yr').addEventListener('input',updatePP);
+});
+</script>
+</body>
+</html>
